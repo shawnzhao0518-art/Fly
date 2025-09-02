@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>我的视频站点</title>
+  <style>
+    :root { --maxw:1200px; --shadow:0 4px 12px rgba(0,0,0,0.1); }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background:#f5f5f5; }
+    header { padding:24px; text-align:center; background:#111; color:#fff; }
+    header h1 { font-size:26px; }
+    main { max-width:var(--maxw); margin:20px auto; padding:0 16px; }
+    .grid { display:grid; gap:20px; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); }
+    .card { position:relative; overflow:hidden; border-radius:14px; box-shadow:var(--shadow); cursor:pointer; transition:transform .2s, box-shadow .2s; background:#000; }
+    .card:hover { transform:translateY(-4px); box-shadow:0 10px 24px rgba(0,0,0,0.22); }
+    .card img { display:block; width:100%; height:100%; object-fit:cover; aspect-ratio:16/9; }
+    .play-icon {
+      position:absolute; inset:auto auto 12px 12px; font-size:22px;
+      color:#fff; background:rgba(0,0,0,0.55); padding:6px 10px; border-radius:999px;
+      pointer-events:none;
+    }
+    footer { text-align:center; padding:20px; font-size:14px; color:#666; }
+    /* Lightbox 弹窗 */
+    .lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.88); justify-content:center; align-items:center; z-index:1000; }
+    .lightbox-content { position:relative; width:min(92vw, 960px); aspect-ratio:16/9; }
+    .lightbox iframe, .lightbox video { position:absolute; inset:0; width:100%; height:100%; border:none; background:#000; }
+    .lightbox-close { position:absolute; top:-44px; right:0; font-size:32px; color:#fff; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <header><h1>点击封面 → 全屏播放</h1></header>
+
+  <main>
+    <section class="grid">
+      <article class="card" data-type="vimeo" data-src="https://player.vimeo.com/video/1111634878">
+        <img src="4A2923A0-1D27-43C4-96DE-4C0A268A2F0F.jpeg" alt="封面1" loading="lazy">
+        <div class="play-icon">▶</div>
+      </article>
+      <article class="card" data-type="vimeo" data-src="https://player.vimeo.com/video/1110632369">
+        <img src="67A5CF00-6022-4C66-8882-F421FAC752C1.jpeg" alt="封面2" loading="lazy">
+        <div class="play-icon">▶</div>
+      </article>
+      <article class="card" data-type="vimeo" data-src="https://player.vimeo.com/video/1115051579">
+        <img src="C1AA8941-D804-4943-8E20-CC1A4EC02C46.jpeg" alt="封面3" loading="lazy">
+        <div class="play-icon">▶</div>
+      </article>
+      <article class="card" data-type="vimeo" data-src="https://player.vimeo.com/video/1115051720">
+        <img src="FADB0DEB-9413-4B0B-A4E9-7C9B2CFBDEC6.jpeg" alt="封面4" loading="lazy">
+        <div class="play-icon">▶</div>
+      </article>
+      <article class="card" data-type="vimeo" data-src="https://player.vimeo.com/video/1115051841">
+        <img src="6136C079-9CA2-49A0-84F6-A06496157AC7.jpeg" alt="封面5" loading="lazy">
+        <div class="play-icon">▶</div>
+      </article>
+    </section>
+  </main>
+
+  <footer>© 2025 | 视频站点示例</footer>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <div class="lightbox-content">
+      <span class="lightbox-close" id="lightbox-close">&times;</span>
+      <iframe id="vimeoFrame" allow="autoplay; fullscreen" allowfullscreen loading="lazy" style="display:none"></iframe>
+      <video id="nativeVideo" controls playsinline style="display:none"></video>
+    </div>
+  </div>
+
+  <script>
+    const cards = document.querySelectorAll('.card');
+    const lightbox = document.getElementById('lightbox');
+    const closeBtn = document.getElementById('lightbox-close');
+    const vimeoFrame = document.getElementById('vimeoFrame');
+    const nativeVideo = document.getElementById('nativeVideo');
+
+    function openLightbox(type, src) {
+      lightbox.style.display = 'flex';
+      if (type === 'file') {
+        vimeoFrame.style.display = 'none'; vimeoFrame.src = '';
+        nativeVideo.style.display = 'block';
+        nativeVideo.src = src;
+        nativeVideo.play().catch(()=>{});
+        if (nativeVideo.requestFullscreen) nativeVideo.requestFullscreen();
+        else if (nativeVideo.webkitEnterFullscreen) nativeVideo.webkitEnterFullscreen();
+      } else {
+        nativeVideo.style.display = 'none'; nativeVideo.src = '';
+        vimeoFrame.style.display = 'block';
+        vimeoFrame.src = src + (src.includes('?') ? '&' : '?') + 'autoplay=1';
+      }
+    }
+
+    cards.forEach(card => {
+      card.addEventListener('click', () => {
+        const type = card.getAttribute('data-type');
+        const src = card.getAttribute('data-src');
+        openLightbox(type, src);
+      });
+    });
+
+    function closeLightbox() {
+      lightbox.style.display = 'none';
+      vimeoFrame.src = '';
+      nativeVideo.pause(); nativeVideo.src = '';
+    }
+
+    closeBtn.addEventListener('click', closeLightbox);
+    window.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+  </script>
+</body>
+</html>
